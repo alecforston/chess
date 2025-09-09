@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -52,8 +53,68 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition piecePosition) {
+        return switch (type) {
+            case KING -> kingMoves(board, piecePosition);
+            case QUEEN -> throw new RuntimeException("Piece not implemented");
+            case BISHOP -> throw new RuntimeException("Piece not implemented");
+            case KNIGHT -> throw new RuntimeException("Piece not implemented");
+            case ROOK -> throw new RuntimeException("Piece not implemented");
+            case PAWN -> throw new RuntimeException("Piece not implemented");
+            case null -> throw new RuntimeException("Piece not implemented");
+        };
+    }
+
+    /**
+     * King moves one square vertically or horizontally
+     *
+     * @return ArrayList of all positions this chess piece can move to
+     */
+    private ArrayList<ChessMove> kingMoves(ChessBoard board, ChessPosition startPosition) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = startPosition.getRow();
+        int col = startPosition.getColumn();
+        int[][] spots = {{1,1}, {1,-1}, {-1,1}, {-1,-1}, {1,0}, {-1,0}, {0,1}, {0,-1}};
+
+        for(int[] spot : spots){
+            int x = spot[0];
+            int y = spot[1];
+            ChessPosition newPosition = new ChessPosition(row + x, col + y);
+
+            if(!isValidPosition(newPosition)) { // Skip if a the square is outside the board
+                continue;
+            }
+
+            // If the position is empty, or contains an enemy piece, add that as a possible king move
+            if (isEmptySquare(board, newPosition) || ((!isEmptySquare(board, newPosition) && isDifferentColor(board, startPosition, newPosition)))){
+                moves.add(new ChessMove(startPosition, newPosition, null));
+            }
+        }
+        return moves;
+    }
+
+    /**
+     * @return boolean of the colors of two positions
+     * true if they are different colors, false if they are the same color
+     */
+    private boolean isDifferentColor(ChessBoard board, ChessPosition pos1, ChessPosition pos2) {
+        return board.getPiece(pos1).getTeamColor() != board.getPiece(pos2).getTeamColor();
+    }
+
+    /**
+     * @return boolean of if there is no piece on the selected position
+     */
+    private boolean isEmptySquare(ChessBoard board, ChessPosition position) {
+        return board.getPiece(position) == null;
+    }
+
+    /**
+     * @return boolean of if the position is on the board
+     */
+    private boolean isValidPosition(ChessPosition position) {
+        int row = position.getRow();
+        int col = position.getColumn();
+        return(row >= 1 && row <= 8 && col >= 1 && col <= 8);
     }
 
     @Override
