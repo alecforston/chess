@@ -57,8 +57,8 @@ public class ChessPiece {
         return switch (type) {
             case KING -> kingMoves(board, piecePosition);
             case QUEEN -> throw new RuntimeException("Piece not implemented");
-            case BISHOP -> throw new RuntimeException("Piece not implemented");
-            case KNIGHT -> throw new RuntimeException("Piece not implemented");
+            case BISHOP -> bishopMoves(board, piecePosition);
+            case KNIGHT -> knightMoves(board, piecePosition);
             case ROOK -> throw new RuntimeException("Piece not implemented");
             case PAWN -> throw new RuntimeException("Piece not implemented");
             case null -> throw new RuntimeException("Piece not implemented");
@@ -92,7 +92,64 @@ public class ChessPiece {
         }
         return moves;
     }
+    /**
+     * Bishop moves two or more squares diagonally
+     *
+     * @return ArrayList of all positions this chess piece can move to
+     */
+    public ArrayList<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        int[][] direction = {{1,1}, {-1,1}, {1,-1}, {-1,-1}};
 
+        for(int[] dir : direction){
+            int x = dir[0];
+            int y = dir[1];
+            ChessPosition newPosition = new ChessPosition(row + x, col + y);
+
+            while(isValidPosition(newPosition) && board.getPiece(newPosition) == null){
+                moves.add(new ChessMove(myPosition, newPosition, null));
+                x += dir[0];
+                y += dir[1];
+                newPosition = new ChessPosition(row + x, col + y);
+            }
+
+            if (isValidPosition(newPosition) && isDifferentColor(board, myPosition, newPosition)){
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            }
+        }
+        return moves;
+    }
+
+    /**
+     * Knight jumps one square vertically and two squares horizontally
+     * or jumps one square horizontally and two squares vertically
+     *
+     * @return ArrayList of all positions this chess piece can move to
+     */
+    private ArrayList<ChessMove> knightMoves(ChessBoard board, ChessPosition startPosition) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = startPosition.getRow();
+        int col = startPosition.getColumn();
+        int[][] spots = {{2,1}, {2,-1}, {-2,1}, {-2,-1}, {1,2}, {-1,2}, {1,-2}, {-1,-2}};
+
+        for(int[] spot : spots){
+            int x = spot[0];
+            int y = spot[1];
+            ChessPosition newPosition = new ChessPosition(row + x, col + y);
+
+            if(!isValidPosition(newPosition)) { // Skip if the square is outside the board
+                continue;
+            }
+
+            // If the position is empty, or contains an enemy piece, add that as a possible king move
+            if (isEmptySquare(board, newPosition) || ((!isEmptySquare(board, newPosition) && isDifferentColor(board, startPosition, newPosition)))){
+                moves.add(new ChessMove(startPosition, newPosition, null));
+            }
+        }
+        return moves;
+    }
     /**
      * @return boolean of the colors of two positions
      * true if they are different colors, false if they are the same color
