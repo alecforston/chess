@@ -1,5 +1,6 @@
 package chess;
 
+import javax.xml.stream.events.StartDocument;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -56,7 +57,7 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition piecePosition) {
         return switch (type) {
             case KING -> kingMoves(board, piecePosition);
-            case QUEEN -> throw new RuntimeException("Piece not implemented");
+            case QUEEN -> queenMoves(board, piecePosition);
             case BISHOP -> bishopMoves(board, piecePosition);
             case KNIGHT -> knightMoves(board, piecePosition);
             case ROOK -> rookMoves(board, piecePosition);
@@ -93,8 +94,21 @@ public class ChessPiece {
         return moves;
     }
 
+
     /**
-     * Bishop moves two or more squares diagonally
+     * Queen moves one or more squares diagonally or orthogonally
+     *
+     * @return ArrayList of all positions this chess piece can move to
+     */
+    private ArrayList<ChessMove> queenMoves(ChessBoard board, ChessPosition startPosition) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        moves.addAll(bishopMoves(board, startPosition));
+        moves.addAll(rookMoves(board, startPosition));
+        return moves;
+    }
+
+    /**
+     * Bishop moves one or more squares diagonally
      *
      * @return ArrayList of all positions this chess piece can move to
      */
@@ -153,7 +167,7 @@ public class ChessPiece {
     }
 
     /**
-     * Bishop moves two or more squares diagonally
+     * Rook moves one or more squares orthogonally
      *
      * @return ArrayList of all positions this chess piece can move to
      */
