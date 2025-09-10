@@ -61,7 +61,7 @@ public class ChessPiece {
             case BISHOP -> bishopMoves(board, piecePosition);
             case KNIGHT -> knightMoves(board, piecePosition);
             case ROOK -> rookMoves(board, piecePosition);
-            case PAWN -> throw new RuntimeException("Piece not implemented");
+            case PAWN -> pawnMoves(board, piecePosition);
             case null -> throw new RuntimeException("Piece not implemented");
         };
     }
@@ -195,6 +195,80 @@ public class ChessPiece {
         }
         return moves;
     }
+
+
+    /**
+     * Pawn moves one or two squares forward on initial move
+     * Can only capture diagonally one square
+     *
+     * @return ArrayList of all positions this chess piece can move to
+     */
+    public ArrayList<ChessMove> pawnMoves(ChessBoard board, ChessPosition startPosition) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = startPosition.getRow();
+        int col = startPosition.getColumn();
+        int[][] directions;
+        int penultimateRow;
+        int startingRow;
+
+        if (getTeamColor() == ChessGame.TeamColor.WHITE) {
+            //White diagonal directions
+            directions = new int[][]{{1, 1}, {1, -1}};
+            penultimateRow = 7;
+            startingRow = 2;
+        } else {
+            // Black diagonal directions
+            directions = new int[][]{{-1, 1}, {-1, -1}};
+            penultimateRow = 2;
+            startingRow = 7;
+        }
+
+        // Get forward single
+        ChessPosition forwardPosition = new ChessPosition(row + directions[0][0], col);
+        // Get forward double
+        ChessPosition doubleForwardPosition = new ChessPosition(row + directions[0][0] * 2, col);
+
+        //Check single move
+        if (isEmptySquare(board, forwardPosition)) {
+            if (row == penultimateRow) {
+                moves.add(new ChessMove(startPosition, forwardPosition, PieceType.QUEEN));
+                moves.add(new ChessMove(startPosition, forwardPosition, PieceType.ROOK));
+                moves.add(new ChessMove(startPosition, forwardPosition, PieceType.BISHOP));
+                moves.add(new ChessMove(startPosition, forwardPosition, PieceType.KNIGHT));
+            } else {
+                moves.add(new ChessMove(startPosition, forwardPosition, null));
+            }
+        }
+
+        // Check double move
+        if (row == startingRow && isEmptySquare(board, forwardPosition) && isEmptySquare(board, doubleForwardPosition)) {
+            moves.add(new ChessMove(startPosition, doubleForwardPosition, null));
+        }
+
+        // Check diagonal attacks
+        for (int[] diag : directions) {
+            int x = diag[0];
+            int y = diag[1];
+            ChessPosition newPosition = new ChessPosition(row + x, col + y);
+
+            if (!isValidPosition(newPosition)) {
+                continue;
+            }
+
+            if (!isEmptySquare(board, newPosition) && isDifferentColor(board, startPosition, newPosition)) {
+                if (row == penultimateRow) {
+                    moves.add(new ChessMove(startPosition, newPosition, PieceType.QUEEN));
+                    moves.add(new ChessMove(startPosition, newPosition, PieceType.ROOK));
+                    moves.add(new ChessMove(startPosition, newPosition, PieceType.BISHOP));
+                    moves.add(new ChessMove(startPosition, newPosition, PieceType.KNIGHT));
+                } else {
+                    moves.add(new ChessMove(startPosition, newPosition, null));
+                }
+            }
+        }
+        return moves;
+    }
+
 
     /**
      * @return boolean of the colors of two positions
