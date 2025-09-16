@@ -91,6 +91,41 @@ public class ChessGame {
     }
 
     /**
+     * Determines if a move puts the team's own king in check
+     *
+     * @param color the team color to check
+     * @param move  the move to test
+     * @return true if the move puts the team in check, otherwise false
+     */
+    private boolean putsInCheck(TeamColor color, ChessMove move) {
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPiece selectedPiece = board.getPiece(move.getStartPosition());
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece capturedPiece = board.getPiece(endPosition);
+
+        //Remove the starting piece
+        board.removePiece(startPosition);
+        //Add the promoted piece or regular piece
+        if (move.getPromotionPiece() == null) {
+            board.addPiece(endPosition, selectedPiece);
+        } else {
+            ChessPiece promotedPiece = new ChessPiece(currentTeam, move.getPromotionPiece());
+            board.addPiece(endPosition, promotedPiece);
+        }
+
+        boolean inCheck = isInCheck(color);
+
+        // Undo the move
+        board.removePiece(endPosition);
+        board.addPiece(startPosition, selectedPiece);
+        if (capturedPiece != null) {
+            board.addPiece(endPosition, capturedPiece);
+        }
+
+        return inCheck;
+    }
+
+    /**
      * Determines if the given team is in checkmate
      *
      * @param teamColor which team to check for checkmate
