@@ -57,7 +57,14 @@ public class ChessGame {
         ArrayList<ChessMove> validMovesList = new ArrayList<>();
         Collection<ChessMove> potentialMoves = piece.pieceMoves(board, startPosition);
 
-        return null;
+        // Look at each potential move. If it doesn't put the king in check, then add to the list
+        for (ChessMove move : potentialMoves) {
+            if (!putsInCheck(piece.getTeamColor(), move)) {
+                validMovesList.add(move);
+            }
+        }
+        Set<ChessMove> validMovesSet = new HashSet<>(validMovesList);
+        return validMovesSet;
     }
 
     /**
