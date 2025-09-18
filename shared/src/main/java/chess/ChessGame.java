@@ -78,6 +78,12 @@ public class ChessGame {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
 
+        //Check if the move is valid
+        Collection<ChessMove> possibleMoves = validMoves(startPosition);
+        if (!possibleMoves.contains(move)) {
+            throw new InvalidMoveException("Invalid move. Please choose a valid move.");
+        }
+
         // Execute the move
         ChessPiece capturedPiece = board.getPiece(endPosition);
         board.removePiece(startPosition);
