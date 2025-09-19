@@ -78,6 +78,16 @@ public class ChessGame {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
 
+        //No piece
+        if (selectedPiece == null) {
+            throw new InvalidMoveException("No piece selected.");
+        }
+
+        //Wrong team
+        if (selectedPiece.getTeamColor() != currentTeam) {
+            throw new InvalidMoveException("It is the other player's turn. Wait for your turn to make a move.");
+        }
+
         //Check if the move is valid
         Collection<ChessMove> possibleMoves = validMoves(startPosition);
         if (!possibleMoves.contains(move)) {
@@ -103,6 +113,9 @@ public class ChessGame {
             }
             throw new InvalidMoveException("Move puts the king in check. Invalid move.");
         }
+
+        // Switch the turn
+        currentTeam = (currentTeam == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
