@@ -52,10 +52,6 @@ public class Server {
         javalin.get("/game", this::handleListGames);
         javalin.post("/game", this::handleCreateGame);
         javalin.put("/game", this::handleJoinGame);
-
-        // Exceptions
-        javalin.exception(DataAccessException.class, this::handleDataAccessException);
-        javalin.exception(Exception.class, this::handleException);
     }
 
     public int run(int desiredPort) {
@@ -75,6 +71,74 @@ public class Server {
         } catch (DataAccessException e) {
             ctx.status(500);
             ctx.json(Map.of("message", "Error: " + e.getMessage()));
+        }
+    }
+
+    private void handleRegister(Context ctx) {
+        try {
+            UserData user = gson.fromJson(ctx.body(), UserData.class);
+            AuthData auth = userService.register(user);
+            ctx.status(200);
+            ctx.json(auth);
+        } catch (DataAccessException e) {
+            handleDataAccessException(e, ctx);
+        }
+    }
+
+    private void handleLogin(Context ctx) {
+        try {
+            UserData user = gson.fromJson(ctx.body(), UserData.class);
+            AuthData auth = userService.login(user);
+            ctx.status(200);
+            ctx.json(auth);
+        } catch (DataAccessException e) {
+            handleDataAccessException(e, ctx);
+        }
+    }
+
+    private void handleLogout(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if (authToken == null) {
+                throw new DataAccessException("Error: unauthorized");
+            }
+            userService.logout(authToken);
+            ctx.status(200);
+            ctx.json(Map.of());
+        } catch (DataAccessException e) {
+            handleDataAccessException(e, ctx);
+        }
+    }
+
+    private void handleListGames(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if (authToken == null) {
+                throw new DataAccessException("Error: unauthorized");
+            }
+            Collection<GameData> games = gameService.listGames(authToken);
+            ctx.status(200);
+            ctx.json(Map.of("games", games));
+        } catch (DataAccessException e) {
+            handleDataAccessException(e, ctx);
+        }
+    }
+
+    private void handleCreateGame(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if (authToken == null) {
+                throw new DataAccessException("Error: unauthorized");
+            }
+
+            Map<String, String> requestBody = gson.fromJson(ctx.body(), Map.class);
+            String gameName = requestBody.get("gameName");
+
+            int gameID = gameService.createGame(gameName, authToken);
+            ctx.status(200);
+            ctx.json(Map.of("gameID", gameID));
+        } catch (DataAccessException e) {
+            handleDataAccessException(e, ctx);
         }
     }
 
