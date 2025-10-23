@@ -142,6 +142,51 @@ public class Server {
         }
     }
 
+    private void handleJoinGame(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            if (authToken == null) {
+                throw new DataAccessException("Error: unauthorized");
+            }
+
+            Map<String, Object> requestBody = gson.fromJson(ctx.body(), Map.class);
+
+            if (!requestBody.containsKey("playerColor")) {
+                throw new DataAccessException("Error: bad request");
+            }
+
+            String playerColorStr = (String) requestBody.get("playerColor");
+            if (playerColorStr == null || playerColorStr.isEmpty()) {
+                throw new DataAccessException("Error: bad request");
+            }
+            if (!playerColorStr.equals("WHITE") && !playerColorStr.equals("BLACK")) {
+                throw new DataAccessException("Error: bad request");
+            }
+
+            ChessGame.TeamColor playerColor = ChessGame.TeamColor.valueOf(playerColorStr);
+
+            Object bodyRequest = requestBody.get("gameID");
+            if (bodyRequest == null) {
+                throw new DataAccessException("Error: bad request");
+            }
+
+            int gameID;
+            if (bodyRequest instanceof Double) {
+                gameID = ((Double) bodyRequest).intValue();
+            } else if (bodyRequest instanceof Integer) {
+                gameID = (Integer) bodyRequest;
+            } else {
+                throw new DataAccessException("Error: bad request");
+            }
+
+            gameService.joinGame(playerColor, gameID, authToken);
+            ctx.status(200);
+            ctx.json(Map.of());
+        } catch (DataAccessException e) {
+            handleDataAccessException(e, ctx);
+        }
+    }
+
     private void handleDataAccessException(DataAccessException e, Context ctx) {
         String message = e.getMessage();
 
