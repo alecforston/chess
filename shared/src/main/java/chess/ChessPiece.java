@@ -1,6 +1,5 @@
 package chess;
 
-import javax.xml.stream.events.StartDocument;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -72,28 +71,9 @@ public class ChessPiece {
      * @return ArrayList of all positions this chess piece can move to
      */
     private ArrayList<ChessMove> kingMoves(ChessBoard board, ChessPosition startPosition) {
-        ArrayList<ChessMove> moves = new ArrayList<>();
-        int row = startPosition.getRow();
-        int col = startPosition.getColumn();
         int[][] spots = {{1,1}, {1,-1}, {-1,1}, {-1,-1}, {1,0}, {-1,0}, {0,1}, {0,-1}};
-
-        for(int[] spot : spots){
-            int x = spot[0];
-            int y = spot[1];
-            ChessPosition newPosition = new ChessPosition(row + x, col + y);
-
-            if(!isValidPosition(newPosition)) { // Skip if a the square is outside the board
-                continue;
-            }
-
-            // If the position is empty, or contains an enemy piece, add that as a possible king move
-            if (isEmptySquare(board, newPosition) || ((!isEmptySquare(board, newPosition) && isDifferentColor(board, startPosition, newPosition)))){
-                moves.add(new ChessMove(startPosition, newPosition, null));
-            }
-        }
-        return moves;
+        return getMovesForOffsets(board, startPosition, spots);
     }
-
 
     /**
      * Queen moves one or more squares diagonally or orthogonally
@@ -113,28 +93,8 @@ public class ChessPiece {
      * @return ArrayList of all positions this chess piece can move to
      */
     public ArrayList<ChessMove> bishopMoves(ChessBoard board, ChessPosition startPosition) {
-        ArrayList<ChessMove> moves = new ArrayList<>();
-        int row = startPosition.getRow();
-        int col = startPosition.getColumn();
-        int[][] direction = {{1,1}, {-1,1}, {1,-1}, {-1,-1}};
-
-        for(int[] dir : direction){
-            int x = dir[0];
-            int y = dir[1];
-            ChessPosition newPosition = new ChessPosition(row + x, col + y);
-
-            while(isValidPosition(newPosition) && board.getPiece(newPosition) == null){
-                moves.add(new ChessMove(startPosition, newPosition, null));
-                x += dir[0];
-                y += dir[1];
-                newPosition = new ChessPosition(row + x, col + y);
-            }
-
-            if (isValidPosition(newPosition) && isDifferentColor(board, startPosition, newPosition)){
-                moves.add(new ChessMove(startPosition, newPosition, null));
-            }
-        }
-        return moves;
+        int[][] directions = {{1,1}, {-1,1}, {1,-1}, {-1,-1}};
+        return getSlidingMoves(board, startPosition, directions);
     }
 
     /**
@@ -144,26 +104,8 @@ public class ChessPiece {
      * @return ArrayList of all positions this chess piece can move to
      */
     private ArrayList<ChessMove> knightMoves(ChessBoard board, ChessPosition startPosition) {
-        ArrayList<ChessMove> moves = new ArrayList<>();
-        int row = startPosition.getRow();
-        int col = startPosition.getColumn();
         int[][] spots = {{2,1}, {2,-1}, {-2,1}, {-2,-1}, {1,2}, {-1,2}, {1,-2}, {-1,-2}};
-
-        for(int[] spot : spots){
-            int x = spot[0];
-            int y = spot[1];
-            ChessPosition newPosition = new ChessPosition(row + x, col + y);
-
-            if(!isValidPosition(newPosition)) { // Skip if the square is outside the board
-                continue;
-            }
-
-            // If the position is empty, or contains an enemy piece, add that as a possible king move
-            if (isEmptySquare(board, newPosition) || ((!isEmptySquare(board, newPosition) && isDifferentColor(board, startPosition, newPosition)))){
-                moves.add(new ChessMove(startPosition, newPosition, null));
-            }
-        }
-        return moves;
+        return getMovesForOffsets(board, startPosition, spots);
     }
 
     /**
@@ -172,30 +114,62 @@ public class ChessPiece {
      * @return ArrayList of all positions this chess piece can move to
      */
     public ArrayList<ChessMove> rookMoves(ChessBoard board, ChessPosition startPosition) {
+        int[][] directions = {{1,0}, {0,1}, {0,-1}, {-1,0}};
+        return getSlidingMoves(board, startPosition, directions);
+    }
+
+    /**
+     * Generic method to get moves for pieces that move one square in specified offsets
+     * (King and Knight)
+     */
+    private ArrayList<ChessMove> getMovesForOffsets(ChessBoard board, ChessPosition startPosition, int[][] offsets) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int row = startPosition.getRow();
         int col = startPosition.getColumn();
-        int[][] direction = {{1,0}, {0,1}, {0,-1}, {-1,0}};
 
-        for(int[] dir : direction){
-            int x = dir[0];
-            int y = dir[1];
+        for (int[] offset : offsets) {
+            int x = offset[0];
+            int y = offset[1];
             ChessPosition newPosition = new ChessPosition(row + x, col + y);
 
-            while(isValidPosition(newPosition) && board.getPiece(newPosition) == null){
-                moves.add(new ChessMove(startPosition, newPosition, null));
-                x += dir[0];
-                y += dir[1];
-                newPosition = new ChessPosition(row + x, col + y);
+            if (!isValidPosition(newPosition)) {
+                continue;
             }
 
-            if (isValidPosition(newPosition) && isDifferentColor(board, startPosition, newPosition)){
+            if (isEmptySquare(board, newPosition) || isDifferentColor(board, startPosition, newPosition)) {
                 moves.add(new ChessMove(startPosition, newPosition, null));
             }
         }
         return moves;
     }
 
+    /**
+     * Generic method to get sliding moves for pieces that can move multiple squares
+     * in specified directions (Bishop, Rook, Queen)
+     */
+    private ArrayList<ChessMove> getSlidingMoves(ChessBoard board, ChessPosition startPosition, int[][] directions) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = startPosition.getRow();
+        int col = startPosition.getColumn();
+
+        for (int[] dir : directions) {
+            int x = dir[0];
+            int y = dir[1];
+            ChessPosition newPosition = new ChessPosition(row + x, col + y);
+
+            while (isValidPosition(newPosition) && board.getPiece(newPosition) == null) {
+                moves.add(new ChessMove(startPosition, newPosition, null));
+                x += dir[0];
+                y += dir[1];
+                newPosition = new ChessPosition(row + x, col + y);
+            }
+
+            if (isValidPosition(newPosition) && isDifferentColor(board, startPosition, newPosition)) {
+                moves.add(new ChessMove(startPosition, newPosition, null));
+            }
+        }
+        return moves;
+    }
 
     /**
      * Pawn moves one or two squares forward on initial move
@@ -212,36 +186,26 @@ public class ChessPiece {
         int startingRow;
 
         if (getTeamColor() == ChessGame.TeamColor.WHITE) {
-            //White diagonal directions
             directions = new int[][]{{1, 1}, {1, -1}};
             penultimateRow = 7;
             startingRow = 2;
         } else {
-            // Black diagonal directions
             directions = new int[][]{{-1, 1}, {-1, -1}};
             penultimateRow = 2;
             startingRow = 7;
         }
 
-        // Get forward single
         ChessPosition forwardPosition = new ChessPosition(row + directions[0][0], col);
-        // Get forward double
         ChessPosition doubleForwardPosition = new ChessPosition(row + directions[0][0] * 2, col);
 
-        //Check single move
+        // Check single move
         if (isEmptySquare(board, forwardPosition)) {
-            if (row == penultimateRow) {
-                moves.add(new ChessMove(startPosition, forwardPosition, PieceType.QUEEN));
-                moves.add(new ChessMove(startPosition, forwardPosition, PieceType.ROOK));
-                moves.add(new ChessMove(startPosition, forwardPosition, PieceType.BISHOP));
-                moves.add(new ChessMove(startPosition, forwardPosition, PieceType.KNIGHT));
-            } else {
-                moves.add(new ChessMove(startPosition, forwardPosition, null));
-            }
+            addPawnMove(moves, startPosition, forwardPosition, row, penultimateRow);
         }
 
         // Check double move
-        if (row == startingRow && isEmptySquare(board, forwardPosition) && isEmptySquare(board, doubleForwardPosition)) {
+        if (row == startingRow && isEmptySquare(board, forwardPosition)
+                && isEmptySquare(board, doubleForwardPosition)) {
             moves.add(new ChessMove(startPosition, doubleForwardPosition, null));
         }
 
@@ -256,19 +220,26 @@ public class ChessPiece {
             }
 
             if (!isEmptySquare(board, newPosition) && isDifferentColor(board, startPosition, newPosition)) {
-                if (row == penultimateRow) {
-                    moves.add(new ChessMove(startPosition, newPosition, PieceType.QUEEN));
-                    moves.add(new ChessMove(startPosition, newPosition, PieceType.ROOK));
-                    moves.add(new ChessMove(startPosition, newPosition, PieceType.BISHOP));
-                    moves.add(new ChessMove(startPosition, newPosition, PieceType.KNIGHT));
-                } else {
-                    moves.add(new ChessMove(startPosition, newPosition, null));
-                }
+                addPawnMove(moves, startPosition, newPosition, row, penultimateRow);
             }
         }
         return moves;
     }
 
+    /**
+     * Adds a pawn move with promotion options if on penultimate row
+     */
+    private void addPawnMove(ArrayList<ChessMove> moves, ChessPosition start,
+                             ChessPosition end, int currentRow, int penultimateRow) {
+        if (currentRow == penultimateRow) {
+            moves.add(new ChessMove(start, end, PieceType.QUEEN));
+            moves.add(new ChessMove(start, end, PieceType.ROOK));
+            moves.add(new ChessMove(start, end, PieceType.BISHOP));
+            moves.add(new ChessMove(start, end, PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(start, end, null));
+        }
+    }
 
     /**
      * @return boolean of the colors of two positions
@@ -291,7 +262,7 @@ public class ChessPiece {
     private boolean isValidPosition(ChessPosition position) {
         int row = position.getRow();
         int col = position.getColumn();
-        return(row >= 1 && row <= 8 && col >= 1 && col <= 8);
+        return (row >= 1 && row <= 8 && col >= 1 && col <= 8);
     }
 
     @Override

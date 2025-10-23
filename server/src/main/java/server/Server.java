@@ -202,9 +202,4 @@ public class Server {
 
         ctx.json(Map.of("message", message));
     }
-
-    private void handleException(Exception e, Context ctx) {
-        ctx.status(500);
-        ctx.json(Map.of("message", "Error: " + e.getMessage()));
-    }
 }
