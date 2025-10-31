@@ -7,6 +7,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import io.javalin.json.JsonMapper;
 import model.*;
+import org.jetbrains.annotations.NotNull;
 import service.*;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -16,15 +17,14 @@ public class Server {
     private final Javalin javalin;
     private final Gson gson = new Gson();
 
-    private UserDAO userDAO;
-    private GameDAO gameDAO;
-    private AuthDAO authDAO;
-
-    private UserService userService;
-    private GameService gameService;
-    private ClearService clearService;
+    private final UserService userService;
+    private final GameService gameService;
+    private final ClearService clearService;
 
     public Server() {
+        UserDAO userDAO;
+        GameDAO gameDAO;
+        AuthDAO authDAO;
         try {
             userDAO = new MySQLUserDAO();
             gameDAO = new MySQLGameDAO();
@@ -40,13 +40,15 @@ public class Server {
         javalin = Javalin.create(config -> {
             config.staticFiles.add("web");
             config.jsonMapper(new JsonMapper() {
+                @NotNull
                 @Override
-                public String toJsonString(Object obj, Type type) {
+                public String toJsonString(@NotNull Object obj, @NotNull Type type) {
                     return gson.toJson(obj, type);
                 }
 
+                @NotNull
                 @Override
-                public <T> T fromJsonString(String json, Type targetType) {
+                public <T> T fromJsonString(@NotNull String json, @NotNull Type targetType) {
                     return gson.fromJson(json, targetType);
                 }
             });
