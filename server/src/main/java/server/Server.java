@@ -82,7 +82,7 @@ public class Server {
             ctx.json(Map.of());
         } catch (DataAccessException e) {
             ctx.status(500);
-            ctx.json(Map.of("message", "Error: " + e.getMessage()));
+            ctx.json(Map.of("message", ensureErrorPrefix(e.getMessage())));
         }
     }
 
@@ -200,7 +200,7 @@ public class Server {
     }
 
     private void handleDataAccessException(DataAccessException e, Context ctx) {
-        String message = e.getMessage();
+        String message = ensureErrorPrefix(e.getMessage());
 
         if (message.contains("unauthorized")) {
             ctx.status(401);
@@ -213,5 +213,13 @@ public class Server {
         }
 
         ctx.json(Map.of("message", message));
+    }
+
+    private String ensureErrorPrefix(String message) {
+        if (message == null) {
+            return "Error: unknown error";
+        }
+
+        return "Error: " + message;
     }
 }
