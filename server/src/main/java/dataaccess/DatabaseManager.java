@@ -43,7 +43,6 @@ public class DatabaseManager {
      */
     static Connection getConnection() throws DataAccessException {
         try {
-            //do not wrap the following line with a try-with-resources
             var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
             conn.setCatalog(databaseName);
             return conn;
@@ -65,7 +64,7 @@ public class DatabaseManager {
         }
     }
 
-    private static void loadProperties(Properties props) {
+    static void loadProperties(Properties props) {
         databaseName = props.getProperty("db.name");
         dbUsername = props.getProperty("db.user");
         dbPassword = props.getProperty("db.password");
