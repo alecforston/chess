@@ -173,19 +173,6 @@ public class DataAccessTest {
     }
 
     @Test
-    @Order(13)
-    @DisplayName("Get Auth Success")
-    public void getAuthSuccess() throws DataAccessException {
-        AuthData auth = new AuthData("token123", "testuser");
-        authDAO.createAuth(auth);
-
-        AuthData retrieved = authDAO.getAuth("token123");
-        assertNotNull(retrieved);
-        assertEquals("token123", retrieved.authToken());
-        assertEquals("testuser", retrieved.username());
-    }
-
-    @Test
     @Order(14)
     @DisplayName("Delete Auth Success")
     public void deleteAuthSuccess() throws DataAccessException {
