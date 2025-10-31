@@ -220,6 +220,11 @@ public class Server {
             return "Error: unknown error";
         }
 
+        // Check if message already contains "error"
+        if (message.toLowerCase().contains("error")) {
+            return message;
+        }
+
         return "Error: " + message;
     }
 }
