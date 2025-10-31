@@ -54,9 +54,7 @@ public class DataAccessTest {
         UserData user = new UserData("testuser", "password123", "test@email.com");
         userDAO.createUser(user);
 
-        assertThrows(DataAccessException.class, () -> {
-            userDAO.createUser(user);
-        });
+        assertThrows(DataAccessException.class, () -> userDAO.createUser(user));
     }
 
     @Test
@@ -65,9 +63,7 @@ public class DataAccessTest {
     public void createUserNullUsername() {
         UserData user = new UserData(null, "password123", "test@email.com");
 
-        assertThrows(DataAccessException.class, () -> {
-            userDAO.createUser(user);
-        });
+        assertThrows(DataAccessException.class, () -> userDAO.createUser(user));
     }
 
     @Test
@@ -159,9 +155,7 @@ public class DataAccessTest {
     public void createAuthNullToken() {
         AuthData auth = new AuthData(null, "testuser");
 
-        assertThrows(DataAccessException.class, () -> {
-            authDAO.createAuth(auth);
-        });
+        assertThrows(DataAccessException.class, () -> authDAO.createAuth(auth));
     }
 
     @Test
@@ -189,9 +183,7 @@ public class DataAccessTest {
     @Order(15)
     @DisplayName("Delete Auth Not Found")
     public void deleteAuthNotFound() {
-        assertThrows(DataAccessException.class, () -> {
-            authDAO.deleteAuth("nonexistent");
-        });
+        assertThrows(DataAccessException.class, () -> authDAO.deleteAuth("nonexistent"));
     }
 
     @Test
@@ -256,9 +248,7 @@ public class DataAccessTest {
         ChessGame chessGame = new ChessGame();
         GameData game = new GameData(0, null, null, null, chessGame);
 
-        assertThrows(DataAccessException.class, () -> {
-            gameDAO.createGame(game);
-        });
+        assertThrows(DataAccessException.class, () -> gameDAO.createGame(game));
     }
 
     @Test
@@ -323,9 +313,7 @@ public class DataAccessTest {
         ChessGame chessGame = new ChessGame();
         GameData game = new GameData(9999, "white", "black", "Nonexistent Game", chessGame);
 
-        assertThrows(DataAccessException.class, () -> {
-            gameDAO.updateGame(game);
-        });
+        assertThrows(DataAccessException.class, () -> gameDAO.updateGame(game));
     }
 
     @Test
