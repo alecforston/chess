@@ -198,4 +198,54 @@ public class ServerFacadeTests {
                 exception.getMessage().toLowerCase().contains("bad request"));
     }
 
+    @Test
+    @DisplayName("List Games With Invalid Auth Token")
+    void listGamesNegativeInvalidAuth() {
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.listGames("invalid_auth_token");
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("unauthorized") ||
+                exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    @Test
+    @DisplayName("Join Game With Invalid Auth Token")
+    void joinGameNegativeInvalidAuth() throws Exception {
+        var authData = facade.register("player1", "password", "p1@email.com");
+        int gameID = facade.createGame("TestGame", authData.authToken());
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.joinGame(ChessGame.TeamColor.WHITE, gameID, "invalid_auth_token");
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("unauthorized") ||
+                exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    @Test
+    @DisplayName("Join Game With Duplicate Color")
+    void joinGameNegativeColorTaken() throws Exception {
+        var authData1 = facade.register("player1", "password1", "p1@email.com");
+        var authData2 = facade.register("player2", "password2", "p2@email.com");
+
+        int gameID = facade.createGame("TestGame", authData1.authToken());
+        facade.joinGame(ChessGame.TeamColor.WHITE, gameID, authData1.authToken());
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.joinGame(ChessGame.TeamColor.WHITE, gameID, authData2.authToken());
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("taken") ||
+                exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    @Test
+    @DisplayName("Join Game With Invalid Game ID")
+    void joinGameNegativeInvalidGameId() throws Exception {
+        var authData = facade.register("player1", "password", "p1@email.com");
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.joinGame(ChessGame.TeamColor.WHITE, 99999, authData.authToken());
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("error") ||
+                exception.getMessage().toLowerCase().contains("bad request"));
+    }
 }
