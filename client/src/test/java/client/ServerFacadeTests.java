@@ -33,6 +33,8 @@ public class ServerFacadeTests {
         facade.clear();
     }
 
+    //positive tests
+
     @Test
     @DisplayName("Register")
     void registerPositive() throws Exception {
@@ -117,6 +119,83 @@ public class ServerFacadeTests {
         });
         assertTrue(exception.getMessage().toLowerCase().contains("unauthorized") ||
                 exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    //Negative tests
+    @Test
+    @DisplayName("Register a Duplicate Username")
+    void registerNegativeDuplicate() throws Exception {
+        facade.register("player1", "password", "p1@email.com");
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.register("player1", "different", "different@email.com");
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("taken") ||
+                exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    @Test
+    @DisplayName("Register with Missing fields")
+    void registerNegativeMissingFields() {
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.register("player1", null, "p1@email.com");
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("error") ||
+                exception.getMessage().toLowerCase().contains("bad request"));
+    }
+
+    @Test
+    @DisplayName("Login with wrong password")
+    void loginNegativeWrongPassword() throws Exception {
+        facade.register("player1", "password", "p1@email.com");
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.login("player1", "notpassword");
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("unauthorized") ||
+                exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    @Test
+    @DisplayName("Login to Nonexistant Account")
+    void loginNegativeUserNotExist() {
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.login("nonexistent", "password");
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("unauthorized") ||
+                exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    @Test
+    @DisplayName("Logout With Invalid Auth Token")
+    void logoutNegativeInvalidAuth() {
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.logout("invalid_auth_token");
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("unauthorized") ||
+                exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    @Test
+    @DisplayName("Create Game With Invalid Auth Token")
+    void createGameNegativeInvalidAuth() {
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.createGame("TestGame", "invalid_auth_token");
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("unauthorized") ||
+                exception.getMessage().toLowerCase().contains("error"));
+    }
+
+    @Test
+    @DisplayName("Create Game Without Game Name")
+    void createGameNegativeNullName() throws Exception {
+        var authData = facade.register("player1", "password", "p1@email.com");
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            facade.createGame(null, authData.authToken());
+        });
+        assertTrue(exception.getMessage().toLowerCase().contains("error") ||
+                exception.getMessage().toLowerCase().contains("bad request"));
     }
 
 }
