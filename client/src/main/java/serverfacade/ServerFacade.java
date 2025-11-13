@@ -16,6 +16,32 @@ public class ServerFacade {
     }
 
     /**
+     * Register new user
+     */
+    public AuthData register(String username, String password, String email) throws Exception {
+        var path = "/user";
+        var body = new UserData(username, password, email);
+        return makeRequest("POST", path, body, null, AuthData.class);
+    }
+
+    /**
+     * Login existing user
+     */
+    public AuthData login(String username, String password) throws Exception {
+        var path = "/session";
+        var body = new UserData(username, password, null);
+        return makeRequest("POST", path, body, null, AuthData.class);
+    }
+
+    /**
+     * Logout current user
+     */
+    public void logout(String authToken) throws Exception {
+        var path = "/session";
+        makeRequest("DELETE", path, null, authToken, null);
+    }
+
+    /**
      * Clear database
      */
     public void clear() throws Exception {
