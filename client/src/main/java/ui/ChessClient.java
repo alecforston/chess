@@ -64,25 +64,25 @@ public class ChessClient {
             return "";
         }
 
-        String[] tokens = input.toLowerCase().split("\\s+");
-        String cmd = tokens[0];
+        String[] tokens = input.split("\\s+");
+        String cmd = tokens[0].toLowerCase();
 
         if (state == State.LOGGED_OUT) {
             return switch (cmd) {
                 case "help" -> helpPrelogin();
                 case "quit" -> "quit";
-                case "login" -> login();
-                case "register" -> register();
+                case "login" -> login(tokens);
+                case "register" -> register(tokens);
                 default -> "Unknown command. Type 'help' for available commands.";
             };
         } else {
             return switch (cmd) {
                 case "help" -> helpPostlogin();
                 case "logout" -> logout();
-                case "create" -> createGame();
+                case "create" -> createGame(tokens);
                 case "list" -> listGames();
-                case "play" -> playGame();
-                case "observe" -> observeGame();
+                case "play" -> playGame(tokens);
+                case "observe" -> observeGame(tokens);
                 default -> "Unknown command. Type 'help' for available commands.";
             };
         }
@@ -91,8 +91,8 @@ public class ChessClient {
     private String helpPrelogin() {
         return SET_TEXT_COLOR_BLUE +
                 "Available commands:\n" +
-                "  register - Create a new account\n" +
-                "  login - Login to your account\n" +
+                "  register <username> <password> <email> - Create a new account\n" +
+                "  login <username> <password> - Login to your account\n" +
                 "  quit - Exit the program\n" +
                 "  help - Display this help message" +
                 RESET_TEXT_COLOR;
@@ -101,7 +101,7 @@ public class ChessClient {
     private String helpPostlogin() {
         return SET_TEXT_COLOR_BLUE +
                 "Available commands:\n" +
-                "  create - Create a new game\n" +
+                "  create <game name> - Create a new game\n" +
                 "  list - List all games\n" +
                 "  play <game number> <WHITE|BLACK> - Join a game\n" +
                 "  observe <game number> - Watch a game\n" +
@@ -110,18 +110,15 @@ public class ChessClient {
                 RESET_TEXT_COLOR;
     }
 
-    private String register() {
+    private String register(String[] tokens) {
         try {
-            System.out.print("Username: ");
-            String user = scanner.nextLine().trim();
-            System.out.print("Password: ");
-            String pass = scanner.nextLine().trim();
-            System.out.print("Email: ");
-            String email = scanner.nextLine().trim();
-
-            if (user.isEmpty() || pass.isEmpty() || email.isEmpty()) {
-                return "Error: All fields are required.";
+            if (tokens.length != 4) {
+                return "Usage: register <username> <password> <email>";
             }
+
+            String user = tokens[1];
+            String pass = tokens[2];
+            String email = tokens[3];
 
             AuthData authData = server.register(user, pass, email);
             authToken = authData.authToken();
@@ -134,16 +131,14 @@ public class ChessClient {
         }
     }
 
-    private String login() {
+    private String login(String[] tokens) {
         try {
-            System.out.print("Username: ");
-            String user = scanner.nextLine().trim();
-            System.out.print("Password: ");
-            String pass = scanner.nextLine().trim();
-
-            if (user.isEmpty() || pass.isEmpty()) {
-                return "Error: Username and password are required.";
+            if (tokens.length != 3) {
+                return "Usage: login <username> <password>";
             }
+
+            String user = tokens[1];
+            String pass = tokens[2];
 
             AuthData authData = server.login(user, pass);
             authToken = authData.authToken();
@@ -170,17 +165,21 @@ public class ChessClient {
         }
     }
 
-    private String createGame() {
+    private String createGame(String[] tokens) {
         try {
-            System.out.print("Game name: ");
-            String gameName = scanner.nextLine().trim();
-
-            if (gameName.isEmpty()) {
-                return "Error: Game name is required.";
+            if (tokens.length < 2) {
+                return "Usage: create <game name>";
             }
 
+            StringBuilder gameNameBuilder = new StringBuilder();
+            for (int i = 1; i < tokens.length; i++) {
+                if (i > 1) gameNameBuilder.append(" ");
+                gameNameBuilder.append(tokens[i]);
+            }
+            String gameName = gameNameBuilder.toString();
+
             int gameID = server.createGame(gameName, authToken);
-            return SET_TEXT_COLOR_GREEN + "Game created successfully! (ID: " + gameID + ")" + RESET_TEXT_COLOR;
+            return SET_TEXT_COLOR_GREEN + "Game created successfully!" + RESET_TEXT_COLOR;
         } catch (Exception e) {
             return "Failed to create game: " + e.getMessage();
         }
@@ -216,23 +215,20 @@ public class ChessClient {
         }
     }
 
-    private String playGame() {
+    private String playGame(String[] tokens) {
         try {
-            System.out.print("Game number: ");
-            String numStr = scanner.nextLine().trim();
-            System.out.print("Color (WHITE/BLACK): ");
-            String colorStr = scanner.nextLine().trim().toUpperCase();
-
-            if (numStr.isEmpty() || colorStr.isEmpty()) {
-                return "Error: Game number and color are required.";
+            if (tokens.length != 3) {
+                return "Usage: play <game number> <WHITE|BLACK>";
             }
 
             int gameNum;
             try {
-                gameNum = Integer.parseInt(numStr);
+                gameNum = Integer.parseInt(tokens[1]);
             } catch (NumberFormatException e) {
                 return "Error: Invalid game number.";
             }
+
+            String colorStr = tokens[2].toUpperCase();
 
             if (!gameMap.containsKey(gameNum)) {
                 return "Error: Invalid game number. Use 'list' to see available games.";
@@ -255,18 +251,15 @@ public class ChessClient {
         }
     }
 
-    private String observeGame() {
+    private String observeGame(String[] tokens) {
         try {
-            System.out.print("Game number: ");
-            String numStr = scanner.nextLine().trim();
-
-            if (numStr.isEmpty()) {
-                return "Error: Game number is required.";
+            if (tokens.length != 2) {
+                return "Usage: observe <game number>";
             }
 
             int gameNum;
             try {
-                gameNum = Integer.parseInt(numStr);
+                gameNum = Integer.parseInt(tokens[1]);
             } catch (NumberFormatException e) {
                 return "Error: Invalid game number.";
             }
