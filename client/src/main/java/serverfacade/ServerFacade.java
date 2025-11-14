@@ -42,6 +42,36 @@ public class ServerFacade {
     }
 
     /**
+     * Create new game
+     */
+    public int createGame(String gameName, String authToken) throws Exception {
+        var path = "/game";
+        var body = Map.of("gameName", gameName);
+        record CreateGameResponse(int gameID) {}
+        var response = makeRequest("POST", path, body, authToken, CreateGameResponse.class);
+        return response.gameID();
+    }
+
+    /**
+     * List all games
+     */
+    public Collection<GameData> listGames(String authToken) throws Exception {
+        var path = "/game";
+        record ListGamesResponse(Collection<GameData> games) {}
+        var response = makeRequest("GET", path, null, authToken, ListGamesResponse.class);
+        return response.games();
+    }
+
+    /**
+     * Join a game as a player
+     */
+    public void joinGame(ChessGame.TeamColor playerColor, int gameID, String authToken) throws Exception {
+        var path = "/game";
+        var body = Map.of("playerColor", playerColor.toString(), "gameID", gameID);
+        makeRequest("PUT", path, body, authToken, null);
+    }
+
+    /**
      * Clear database
      */
     public void clear() throws Exception {
