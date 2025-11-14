@@ -194,8 +194,11 @@ public class ServerFacadeTests {
         Exception exception = assertThrows(Exception.class, () -> {
             facade.createGame(null, authData.authToken());
         });
-        assertTrue(exception.getMessage().toLowerCase().contains("error") ||
-                exception.getMessage().toLowerCase().contains("bad request"));
+        String message = exception.getMessage();
+        assertTrue(message == null ||
+                        message.toLowerCase().contains("error") ||
+                        message.toLowerCase().contains("bad request"),
+                "Expected error but got: " + message);
     }
 
     @Test
