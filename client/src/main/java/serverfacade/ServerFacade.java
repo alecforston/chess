@@ -15,6 +15,10 @@ public class ServerFacade {
         this.serverUrl = "http://localhost:" + port;
     }
 
+    public ServerFacade(String url) {
+        this.serverUrl = url;
+    }
+
     /**
      * Register new user
      */
