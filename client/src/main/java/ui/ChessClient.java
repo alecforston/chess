@@ -173,7 +173,9 @@ public class ChessClient {
 
             StringBuilder gameNameBuilder = new StringBuilder();
             for (int i = 1; i < tokens.length; i++) {
-                if (i > 1) gameNameBuilder.append(" ");
+                if (i > 1) {
+                    gameNameBuilder.append(" ");
+                }
                 gameNameBuilder.append(tokens[i]);
             }
             String gameName = gameNameBuilder.toString();
