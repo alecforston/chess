@@ -113,7 +113,7 @@ public class ServerFacade {
             }
             return null;
         } catch (Exception ex) {
-            throw new Exception("Error: " + ex.getMessage());
+            throw new Exception(ex.getMessage());
         }
     }
 
