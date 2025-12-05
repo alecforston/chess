@@ -84,7 +84,7 @@ public class BoardDrawer {
         ChessPiece piece = board.getPiece(position);
 
         boolean isLightSquare = (row + col) % 2 == 0;
-        String bgColor = isLightSquare ? LIGHT_SQUARE : DARK_SQUARE;
+        String bgColor = isLightSquare ?  DARK_SQUARE: LIGHT_SQUARE;
 
         System.out.print(bgColor);
 
