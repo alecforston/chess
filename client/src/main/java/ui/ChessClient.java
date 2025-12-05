@@ -227,17 +227,17 @@ public class ChessClient {
             try {
                 gameNum = Integer.parseInt(tokens[1]);
             } catch (NumberFormatException e) {
-                return "Error: Invalid game number.";
+                return "Invalid game number.";
             }
 
             String colorStr = tokens[2].toUpperCase();
 
             if (!gameMap.containsKey(gameNum)) {
-                return "Error: Invalid game number. Use 'list' to see available games.";
+                return "Invalid game number. Use 'list' to see available games.";
             }
 
             if (!colorStr.equals("WHITE") && !colorStr.equals("BLACK")) {
-                return "Error: Color must be WHITE or BLACK.";
+                return "Color must be WHITE or BLACK.";
             }
 
             ChessGame.TeamColor color = ChessGame.TeamColor.valueOf(colorStr);
@@ -263,11 +263,11 @@ public class ChessClient {
             try {
                 gameNum = Integer.parseInt(tokens[1]);
             } catch (NumberFormatException e) {
-                return "Error: Invalid game number.";
+                return "Invalid game number.";
             }
 
             if (!gameMap.containsKey(gameNum)) {
-                return "Error: Invalid game number. Use 'list' to see available games.";
+                return "Invalid game number. Use 'list' to see available games.";
             }
 
             BoardDrawer.drawBoard(ChessGame.TeamColor.WHITE);
