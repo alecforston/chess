@@ -114,7 +114,7 @@ public class Server {
         try {
             String authToken = ctx.header("authorization");
             if (authToken == null) {
-                throw new DataAccessException("Error: unauthorized");
+                throw new DataAccessException("unauthorized");
             }
             userService.logout(authToken);
             ctx.status(200);
@@ -128,7 +128,7 @@ public class Server {
         try {
             String authToken = ctx.header("authorization");
             if (authToken == null) {
-                throw new DataAccessException("Error: unauthorized");
+                throw new DataAccessException("unauthorized");
             }
             Collection<GameData> games = gameService.listGames(authToken);
             ctx.status(200);
@@ -142,7 +142,7 @@ public class Server {
         try {
             String authToken = ctx.header("authorization");
             if (authToken == null) {
-                throw new DataAccessException("Error: unauthorized");
+                throw new DataAccessException("unauthorized");
             }
 
             Map<String, String> requestBody = gson.fromJson(ctx.body(), Map.class);
@@ -160,28 +160,28 @@ public class Server {
         try {
             String authToken = ctx.header("authorization");
             if (authToken == null) {
-                throw new DataAccessException("Error: unauthorized");
+                throw new DataAccessException("unauthorized");
             }
 
             Map<String, Object> requestBody = gson.fromJson(ctx.body(), Map.class);
 
             if (!requestBody.containsKey("playerColor")) {
-                throw new DataAccessException("Error: bad request");
+                throw new DataAccessException("bad request");
             }
 
             String playerColorStr = (String) requestBody.get("playerColor");
             if (playerColorStr == null || playerColorStr.isEmpty()) {
-                throw new DataAccessException("Error: bad request");
+                throw new DataAccessException("bad request");
             }
             if (!playerColorStr.equals("WHITE") && !playerColorStr.equals("BLACK")) {
-                throw new DataAccessException("Error: bad request");
+                throw new DataAccessException("bad request");
             }
 
             ChessGame.TeamColor playerColor = ChessGame.TeamColor.valueOf(playerColorStr);
 
             Object bodyRequest = requestBody.get("gameID");
             if (bodyRequest == null) {
-                throw new DataAccessException("Error: bad request");
+                throw new DataAccessException("bad request");
             }
 
             int gameID;
@@ -190,7 +190,7 @@ public class Server {
             } else if (bodyRequest instanceof Integer) {
                 gameID = (Integer) bodyRequest;
             } else {
-                throw new DataAccessException("Error: bad request");
+                throw new DataAccessException("bad request");
             }
 
             gameService.joinGame(playerColor, gameID, authToken);
@@ -219,7 +219,7 @@ public class Server {
 
     private String ensureErrorPrefix(String message) {
         if (message == null) {
-            return "Error: unknown error";
+            return "unknown error";
         }
 
         // Check if message already contains "error"
